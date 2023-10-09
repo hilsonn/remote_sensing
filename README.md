@@ -1,4 +1,5 @@
 # remote_sensing
+Extension to:
 Simulation of satellite detection of unresolved subpixel fire for PC4262 Remote Sensing.
 
 # files
@@ -7,19 +8,14 @@ Simulation of satellite detection of unresolved subpixel fire for PC4262 Remote 
   A helper `python` script that when imported, initializes common physical constants and imports multiple functions that compute, transfer and integrate radiances, designed for rapid computation as matrices via the `numpy` module. Written with grid simulation in mind.
   
  
-2. `fire_modelling.ipynb`
+2. `fire_funcs.py`
 
-  An interactive Jupyter notebook, contains everything from `fire_funcs.py` and `fire_detection_plots.py`.
+  Helper functions to do the simulations of fire and simulate detection algorithms.
+  Updated: fire temperature evolution follows a S-curve with log decay
   
-  
-3. `fire_funcs.py`
+3. `fire_detection_plots.py`
 
-  All helper functions to do the simulations are found here.
-  
-  
-4. `fire_detection_plots.py`
-
-  Run this script for a example of the simulation. Outputs: 1) GIF of fire spread, 2) detection at saturation temperature, 3) detection at 10% saturation temperature, 4) detection at 50% saturation temperature, and 5) detection using MODIS v4 detection algorithm. Uses `matplotlib.animation` module to make the GIFs.
+  Run this script for a example of the simulation. Outputs: 1) MP4 of fire spread, 2) PNG of biomass grid used 3) MP4 of detection at saturation temperature, and 5) MP4 of detection using MODIS absolute and relative fire algorithms. Uses `matplotlib.animation` module to make the MP4s.
   
 #
 
