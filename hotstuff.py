@@ -1,12 +1,10 @@
 from array import array
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 h = 6.626E-34
 c = 299792458
 k = 1.38E-23
 sigma = 5.67E-8
-matplotlib.use('TKAgg')
 
 def renorm(Temp:float, lda:float) -> float:
     '''
@@ -51,7 +49,9 @@ def planck_estimate(x_1:float, x_2:float, temp:float, propagate:bool = True, att
 
 def radiatedpower(T, wl ,bw = 1E-7, emis:float = 1):
     '''
-    Accepts temperature `T` and wavelength `wl`, applies the `planck_estimate` at the appropriate shortwave/longwave limit. Also accepts different bandwidths `bw`, defaults to `1E-7` and emissivity `emis`, default to 1. Emissivity is assumed to be constant over a short `bw`.'''
+    Accepts temperature `T` and wavelength `wl`, applies the `planck_estimate` at the appropriate shortwave/longwave limit.
+    Also accepts different bandwidths `bw`, defaults to `1E-7` and emissivity `emis`, default to 1. Emissivity is assumed to be constant over a short `bw`.
+    '''
     if wl == 11E-6:
         atn = 11
     else:
@@ -61,7 +61,9 @@ def radiatedpower(T, wl ,bw = 1E-7, emis:float = 1):
 
 def brighttemp(lda, power, bw = 1E-7, err_check = None):
     '''
-    Returns the brightness temperature based on the shortwave approximation. bandwidth `bw` is onesided to be consistent with other functions; the function will double it when computing spectral radiance. `err_check` accepts `float` or `int` as a input temperature for checking. If given, the function returns a tuple of (`T_b`, `x`-`err_check`). 
+    Returns the brightness temperature based on the shortwave approximation.
+    Bandwidth `bw` is onesided to be consistent with other functions; the function will double it when computing spectral radiance.
+    `err_check` accepts `float` or `int` as a input temperature for checking. If given, the function returns a tuple of (`T_b`, `x`-`err_check`). 
     '''
     x = (h*c/k/lda)/(np.log((bw*2*2*np.pi*h*c**2/lda**5/power)+1))
     if isinstance((err_check),(float, int)):
@@ -70,7 +72,11 @@ def brighttemp(lda, power, bw = 1E-7, err_check = None):
 
 def gridpowerfinder(grid:np.ndarray, wl:float, bw = 1E-7)-> np.ndarray:
     '''
-    accepts an arbitrary grid and applies the `planck_estimate` function element-wise at the wavelength `wl`. Bandwidth `bw` is onesided to be consistent with other functions; the function will double it when computing spectral radiance. The computed element-wise grid power is normalized to grid size with equal weightage, reflecting an isotropic pixel detector on the satellite. Returns a `radiancegrid` of the same dimensions of input `grid`. 
+    accepts an arbitrary grid and applies the `planck_estimate` function element-wise at the wavelength `wl`.
+    Bandwidth `bw` is onesided to be consistent with other functions; the function will double it when computing spectral radiance.
+    The computed element-wise grid power is normalized to grid size with equal weightage, reflecting an isotropic pixel detector on the satellite.
+
+    Returns a `radiancegrid` of the same dimensions of input `grid`. 
     '''
     gridc = grid.copy()
     gridsize = np.size(gridc)
@@ -91,49 +97,66 @@ def gridbrightness(rgrid: np.ndarray, wl:float, bandwidth = 1E-7)-> list[float]:
 
 def totalfinder(tempgrid:np.ndarray, bandwidth = 1E-7, wllist:list = [4E-6, 11E-6])-> list[float]:
     '''
-    Accepts the temperature grid and parses it through `gridpowerfinder` and `gridbrightness` together at wavelengths `wllist` that defaults to 4 and 11 microns. Returns a list of brightness temperatures at the wavelengths in `wllist` that is detected by the satellite.'''
+    accepts the temperature grid and parses it through `gridpowerfinder` and `gridbrightness` together at wavelengths `wllist` that defaults to 4 and 11 microns.
+    returns a list of brightness temperatures at the wavelengths in `wllist` that is detected by the satellite.
+    '''
     result = []
     tempgridc = tempgrid.copy()
     for i in wllist:
         result.append(gridbrightness(gridpowerfinder(tempgridc, i),i))
     return(result)
 
-# %%
-# spare code to get apparent brightness with fire temp, recreating prof's plot
-plt.rcParams.update({'font.size': 16})
+if __name__ == "__main__":
+    ## spare code to get apparent brightness with fire temp, recreating prof's plot
+    plt.rcParams.update({'font.size': 16})
 
-firefraction = np.logspace(-4,0,40) 
-firetemp = 650
-bgtemp = 305.273
-averaged_power_4 = firefraction*radiatedpower(firetemp, wl = 4E-6) + (1-firefraction)*radiatedpower(bgtemp, wl = 4E-6)
-averaged_power_11 = firefraction*radiatedpower(firetemp, wl = 11E-6) + (1-firefraction)*radiatedpower(bgtemp, wl = 11E-6)
-fig, ax = plt.subplots(figsize = (10,7))
-ax.plot(firefraction, brighttemp(4E-6, averaged_power_4), label = '4 μm')
-ax.plot(firefraction, brighttemp(11E-6, averaged_power_11), label = '11 μm')
-ax.set(xlabel = 'fire fraction', ylabel ='brightness temperature', title = f'Apparent brightness temperature at TOA, Fire temperature = {firetemp}K')
-ax.legend()
-ax.set_xscale('log')
-ax.grid(alpha = 0.8)
-plt.tight_layout()
-plt.savefig('firefraction', dpi = 300)
-plt.show()
+    firefraction = np.logspace(-4,0,40) 
+    firetemp = 500
+    bgtemp = 305.273
+    averaged_power_4 = firefraction*radiatedpower(firetemp, wl = 4E-6) + (1-firefraction)*radiatedpower(bgtemp, wl = 4E-6)
+    averaged_power_11 = firefraction*radiatedpower(firetemp, wl = 11E-6) + (1-firefraction)*radiatedpower(bgtemp, wl = 11E-6)
+    fig, ax = plt.subplots(figsize = (10,7))
+    ax.plot(firefraction, brighttemp(4E-6, averaged_power_4), label = '4 μm')
+    ax.plot(firefraction, brighttemp(11E-6, averaged_power_11), label = '11 μm')
+    ax.set(xlabel = 'fire fraction', ylabel ='brightness temperature', title = f'Apparent brightness temperature at TOA, Fire temperature = {firetemp}K')
+    ax.legend()
+    ax.set_xscale('log')
+    ax.grid(alpha = 0.8)
+    plt.tight_layout()
+    plt.savefig('firefraction', dpi = 300)
+    plt.show()
 
-# %%
-# more spare code, thermal discrepancies plot
-# templist = np.linspace(300,1500)
-# v = 1E-7
-# plist4 = planck_estimate(renorm(templist, 4E-6-v), renorm(templist,4E-6+v), temp= templist, xflip= 1.75, legacy = True)
-# plist11 = planck_estimate(renorm(templist, 11E-6 -v), renorm(templist,11E-6 +v), temp= templist, xflip =1.75, legacy = True)
-# bt4 = brighttemp(4E-6, plist4)
-# bt11 = brighttemp(11E-6, plist11)
-# fig, ax = plt.subplots(figsize = (10,8))
-# ax.plot(templist, (bt4-templist), label = '4 μm')
-# ax.plot(templist, (bt11-templist), label = '11 μm')
-# ax.set(xlabel = 'Absolute Temperature, K', ylabel = 'Absolute error', title = r'Shortwave approximation thermal discrepancies')
-# ax.grid(alpha =0.8)
-# ax.legend()
-# plt.tight_layout()
-# plt.savefig('sw_abs_error.png', dpi = 300)
-# plt.show()
+    ## more spare code, thermal discrepancies plot
+    templist = np.linspace(300,1500)
+    v = 1E-7
+    plist4 = planck_estimate(renorm(templist, 4E-6-v), renorm(templist,4E-6+v), temp = templist, xflip = 1.75, legacy = True)
+    plist11 = planck_estimate(renorm(templist, 11E-6 -v), renorm(templist,11E-6+v), temp = templist, xflip = 1.75, legacy = True)
+    bt4 = brighttemp(4E-6, plist4)
+    bt11 = brighttemp(11E-6, plist11)
+    fig, ax = plt.subplots(figsize = (10,8))
+    ax.plot(templist, (bt4-templist)/bt4, label = '4 μm')
+    ax.plot(templist, (bt11-templist)/bt11, label = '11 μm')
+    ax.set(xlabel = 'Temperature, K', ylabel = 'Relative error', title = r'Shortwave approximation thermal discrepancies')
+    ax.grid(alpha =0.8)
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig('sw_rel_error.png', dpi = 300)
+    plt.show()
 
-# %%
+    # adaptive approx switching
+
+    for xflip in [1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5]:
+        plist4_adaptive = planck_estimate(renorm(templist, 4E-6-v), renorm(templist,4E-6+v), temp = templist, xflip = xflip, legacy = False)
+        plist11_adaptive = planck_estimate(renorm(templist, 11E-6 -v), renorm(templist,11E-6+v), temp = templist, xflip = xflip, legacy = False)
+        bt4_adaptive = brighttemp(4E-6, plist4_adaptive)
+        bt11_adaptive = brighttemp(11E-6, plist11_adaptive)
+        fig, ax = plt.subplots(figsize = (10,8))
+        ax.plot(templist, (bt4_adaptive-templist)/bt4_adaptive, label = '4 μm')
+        ax.plot(templist, (bt11_adaptive-templist)/bt11_adaptive, label = '11 μm')
+        ax.set(xlabel = 'Temperature, K', ylabel = 'Relative error', title = f'Adaptive approximation thermal discrepancies, $x_t$ = {xflip}')
+        ax.grid(alpha =0.8)
+        ax.legend()
+        plt.tight_layout()
+        plt.savefig(f'adaptive_rel_error_xt={xflip}.png', dpi = 300)
+    plt.show()
+
