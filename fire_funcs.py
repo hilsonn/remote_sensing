@@ -13,15 +13,15 @@ from hotstuff import totalfinder
 # initialise global variables
 N_frames = int(input('Number of frames for simulation? '))
 dims = (int(input('Length in pixels? ')),int(input('Height in pixels? ')))
-
+# grids are 500 by 500 large, meaning each subpixel represents 2000m^2
 temp_bg = 32.123
-temp_grid = np.full((dims[0]*100,dims[1]*100),temp_bg)
-bmass_grid = np.random.normal(0.9,0.4,(dims[0]*100,dims[1]*100))
+temp_grid = np.full((dims[0]*500,dims[1]*500),temp_bg)
+bmass_grid = np.random.normal(0.8,0.1,(dims[0]*500,dims[1]*500))
 # ensure bmass is between 0 and 1
 bmass_grid[bmass_grid<=0] = 0
 bmass_grid[bmass_grid>=1] = 1
 # check_grid stores how long a fire has been burning at the coord
-check_grid = np.zeros((dims[0]*100,dims[1]*100))
+check_grid = np.zeros((dims[0]*500,dims[1]*500))
 
 def temp_curve(temp_0, tpeak, biomass):
     """ Returns the temperature evolution curve for all time, needs params to control peak temp and how long it burns for """
@@ -56,7 +56,7 @@ def spread_fire(temp_self, k, coords):
 
 def start_sim(temp_grid = temp_grid):
   """ Starts simulation """
-  temp_grid[dims[0]*100//2,dims[1]*100//2] = 500 #seed center with fire, temperature = 500 celsius
+  temp_grid[dims[0]*500//2,dims[1]*500//2] = 500 #seed center with fire, temperature = 500 celsius
 
   frames = [] # make frames for the gif
   firefrac_frames = [] # list of fire frac for each frame
